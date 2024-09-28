@@ -7,12 +7,12 @@ function App() {
   const [userInfo, setUserInfo] = useState(null);
   const [repositories, setRepositories] = useState([]);
 
-  const isChromeExtension =
-    typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id;
+  const isChromeExtension = typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id;
 
   useEffect(() => {
     if (isChromeExtension) {
-      checkAuthentication();
+      // checkAuthentication();
+      console.log(isAuthenticated);
     }
   }, []);
 
@@ -30,13 +30,13 @@ function App() {
     // window.location.assign("https://github.com/login/oauth/authorize?client_id="+process.env.REACT_APP_GITHUB_CLIENT_ID);
     // console.log("hllo");
     chrome.runtime.sendMessage(
-      { action: "authenticate", clientId: process.env.REACT_APP_CLIENT_ID, clientSecret: process.env.REACT_APP_CLIENT_SECRET},
+      { action: "authenticate", clientId: process.env.REACT_APP_CLIENT_ID },
       function (response) {
         if (response.error) {
           console.error("Authentication failed:", response.error);
         } else {
           setIsAuthenticated(true);
-          checkAuthentication();
+          // checkAuthentication();
         }
       }
     );
@@ -45,7 +45,7 @@ function App() {
   // const handleLogin = () => {
   //   // Check if the chrome object is available (indicating we're in an extension)
   //   const isChromeExtension = typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id;
-
+  
   //   if (isChromeExtension) {
   //     // Send a message to the background script to trigger the redirection to YouTube
   //     chrome.runtime.sendMessage({ action: "redirectToYouTube" }, (response) => {
@@ -59,6 +59,7 @@ function App() {
   //     console.error("Chrome runtime not available.");
   //   }
   // };
+  
 
   const fetchUserInfo = () => {
     chrome.runtime.sendMessage(
@@ -99,9 +100,9 @@ function App() {
           >
             Login with GitHub
           </button>
-        ) : (
-          <div>
-            {userInfo && (
+        ) : ( 
+        <div> 
+          {userInfo && (
               <p className="text-gray-700 mb-4 text-center">
                 Logged in as:{" "}
                 <span className="font-semibold">{userInfo.login}</span>
@@ -119,9 +120,9 @@ function App() {
                   {repo.name}
                 </li>
               ))}
-            </ul>
+            </ul> 
           </div>
-        )}
+        )} 
       </div>
     </div>
   );
