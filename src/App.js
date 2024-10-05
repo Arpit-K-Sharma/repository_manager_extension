@@ -1,128 +1,178 @@
-/* global chrome */
 import React, { useState, useEffect } from "react";
 import "./App.css";
+import { FiGithub, FiLogOut, FiExternalLink } from 'react-icons/fi';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [repositories, setRepositories] = useState([]);
+  const [repositories, setRepositories] = useState({});
 
-  const isChromeExtension = typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id;
+  const isChromeExtension =
+    typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id;
 
-  useEffect(() => {
+  const checkExistingToken = () => {
     if (isChromeExtension) {
-      // checkAuthentication();
-      console.log(isAuthenticated);
+      chrome.storage.local.get("githubToken", function (data) {
+        if (data.githubToken) {
+          console.log(
+            "Token found in local storage, logging in with existing token."
+          );
+          authenticateWithToken(data.githubToken);
+        } else {
+          console.log("No token found.");
+          setIsAuthenticated(false);
+        }
+      });
     }
-  }, []);
+  };
 
-  const checkAuthentication = () => {
-    chrome.storage.local.get("githubToken", function (data) {
-      if (data.githubToken) {
-        setIsAuthenticated(true);
-        fetchUserInfo();
-        fetchRepositories();
-      }
-    });
+  const authenticateWithToken = (token) => {
+    fetchUserInfo(token);
+    fetchRepositories(token);
+    setIsAuthenticated(true);
   };
 
   const handleLogin = () => {
-    // window.location.assign("https://github.com/login/oauth/authorize?client_id="+process.env.REACT_APP_GITHUB_CLIENT_ID);
-    // console.log("hllo");
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        { action: "authenticate", clientId: process.env.REACT_APP_CLIENT_ID },
+        function (response) {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else if (response && response.status === "success" && response.access_token) {
+            chrome.storage.local.set({ githubToken: response.access_token }, () => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                chrome.storage.local.get("githubToken", (data) => {
+                  console.log("Retrieved GitHub token from storage:", data.githubToken);
+                  authenticateWithToken(data.githubToken);
+                  resolve(response);
+                });
+              }
+            });
+          } else {
+            reject(new Error("Authentication failed or invalid response"));
+          }
+        }
+      );
+    });
+  };
+
+  const fetchUserInfo = (token) => {
     chrome.runtime.sendMessage(
-      { action: "authenticate", clientId: process.env.REACT_APP_CLIENT_ID },
+      { action: "fetchUserInfo", access_token: token },
       function (response) {
-        if (response.error) {
-          console.error("Authentication failed:", response.error);
+        if (response.status === "success") {
+          console.log("User Data retrieved successfully", response.userData.data);
+          setUserInfo(response.userData.data);
         } else {
-          setIsAuthenticated(true);
-          // checkAuthentication();
+          console.error("Failed to fetch user info:", response.message);
         }
       }
     );
   };
 
-  // const handleLogin = () => {
-  //   // Check if the chrome object is available (indicating we're in an extension)
-  //   const isChromeExtension = typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id;
-  
-  //   if (isChromeExtension) {
-  //     // Send a message to the background script to trigger the redirection to YouTube
-  //     chrome.runtime.sendMessage({ action: "redirectToYouTube" }, (response) => {
-  //       if (response && response.status === "Redirected to YouTube") {
-  //         console.log("Successfully redirected to YouTube");
-  //       } else {
-  //         console.error("Failed to redirect or no response from background script");
-  //       }
-  //     });
-  //   } else {
-  //     console.error("Chrome runtime not available.");
-  //   }
-  // };
-  
-
-  const fetchUserInfo = () => {
+  const fetchRepositories = (token) => {
     chrome.runtime.sendMessage(
-      { action: "fetchUserInfo" },
+      { action: "fetchRepositories", access_token: token },
       function (response) {
-        if (response.error) {
-          console.error("Failed to fetch user info:", response.error);
+        console.log(response);
+        if (response.status === "success") {
+          console.log("Repositories retrieved successfully", response.repositories);
+          setRepositories(response.repositories);
         } else {
-          setUserInfo(response);
+          console.error("Failed to fetch repositories:", response.message);
         }
       }
     );
   };
 
-  const fetchRepositories = () => {
-    chrome.runtime.sendMessage(
-      { action: "fetchRepositories" },
-      function (response) {
-        if (response.error) {
-          console.error("Failed to fetch repositories:", response.error);
-        } else {
-          setRepositories(response);
-        }
-      }
-    );
+  const handleLogout = () => {
+    if (isChromeExtension) {
+      chrome.storage.local.remove("githubToken", function () {
+        console.log("GitHub token removed from local storage");
+        setIsAuthenticated(false);
+        setUserInfo(null);
+        setRepositories({});
+      });
+    }
   };
+
+  useEffect(() => {
+    checkExistingToken();
+  }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          GitHub Repository Manager
-        </h1>
-        {!isAuthenticated ? (
-          <button
-            onClick={handleLogin}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition duration-300 ease-in-out"
-          >
-            Login with GitHub
-          </button>
-        ) : ( 
-        <div> 
-          {userInfo && (
-              <p className="text-gray-700 mb-4 text-center">
-                Logged in as:{" "}
-                <span className="font-semibold">{userInfo.login}</span>
-              </p>
-            )}
-            <h2 className="text-lg font-bold mb-4 text-gray-800">
-              Your Repositories:
-            </h2>
-            <ul className="space-y-3">
-              {repositories.map((repo) => (
-                <li
-                  key={repo.id}
-                  className="p-3 bg-gray-100 hover:bg-gray-200 rounded transition duration-200 ease-in-out"
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600 p-6">
+      <div className="w-full max-w-md bg-white shadow-2xl rounded-lg overflow-hidden">
+        <div className="bg-gray-800 text-white py-4 px-6">
+          <h1 className="text-2xl font-bold flex items-center justify-center">
+            <FiGithub className="mr-2" />
+            GitHub Repository Manager
+          </h1>
+        </div>
+        <div className="p-6">
+          {!isAuthenticated ? (
+            <button
+              onClick={() => {
+                handleLogin().catch((error) => {
+                  console.error("Login error:", error.message);
+                });
+              }}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out flex items-center justify-center"
+            >
+              <FiGithub className="mr-2" />
+              Login with GitHub
+            </button>
+          ) : (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <p className="text-gray-700">
+                  Logged in as:{" "}
+                  <span className="font-semibold text-blue-600">{userInfo ? userInfo.login : 'Loading...'}</span>
+                </p>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center"
                 >
-                  {repo.name}
-                </li>
-              ))}
-            </ul> 
-          </div>
-        )} 
+                  <FiLogOut className="mr-2" />
+                  Logout
+                </button>
+              </div>
+              <h2 className="text-xl font-bold mb-4 text-gray-800">
+                Your Repositories
+              </h2>
+              <div className="bg-gray-100 rounded-lg p-4 max-h-96 overflow-y-auto">
+                {Object.entries(repositories).length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No repositories found</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {Object.entries(repositories).map(([name, url]) => (
+                      <li
+                        key={name}
+                        className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300 ease-in-out"
+                      >
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 font-medium flex items-center justify-between"
+                        >
+                          <span>{name}</span>
+                          <FiExternalLink className="text-gray-400" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <footer className="bg-gray-100 text-center py-4 text-sm text-gray-600">
+          &copy; 2024 GitHub Repo Manager. All rights reserved.
+        </footer>
       </div>
     </div>
   );
