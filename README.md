@@ -1,6 +1,6 @@
 # GitHub Repository Manager
 
-#### Video Demo: <URL HERE>
+#### Video Demo: [<URL HERE>](https://youtu.be/gdfg1AtLNCA)
 
 #### Description:
 
