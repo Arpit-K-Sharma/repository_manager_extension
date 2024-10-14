@@ -1,12 +1,19 @@
+/* App.css */
 .App {
-  width: 300px;
-  padding: 20px;
+  width: 400px; /* Fixed width for the popup */
+  height: auto; /* Allow height to adjust based on content */
+  padding: 0;
+  margin:0;
   font-family: Arial, sans-serif;
+  overflow-y: auto; /* Allow scrolling if content exceeds height */
+  box-sizing: border-box; /* Include padding in width and height calculations */
+  min-height: 600px; /* Minimum height to ensure content fits */
 }
 
 h1 {
-  font-size: 18px;
+  font-size: 24px;
   margin-bottom: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Add text shadow for depth */
 }
 
 button {
@@ -16,6 +23,10 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+button:hover {
+  background-color: #025ea0; /* Darker blue on hover */
 }
 
 #user-info {
@@ -28,4 +39,30 @@ button {
   border: 1px solid #e1e4e8;
   border-radius: 5px;
   margin-bottom: 10px;
+}
+
+.repo-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+}
+
+/* Custom styles for repository links */
+.repo-link {
+  color: #0366d6; /* GitHub blue */
+  font-weight: 500;
+}
+
+.repo-link:hover {
+  color: #025ea0; /* Darker blue on hover */
+}
+
+footer {
+  border-top: 1px solid #e1e4e8;
+  margin-top: 20px;
+  margin-bottom: 0px;
+}
+
+/* Ensure the repositories list is scrollable and has a max height */
+.repo-list {
+  max-height: 200px; /* Max height for the repository list */
+  overflow-y: auto; /* Enable vertical scrolling */
 }
