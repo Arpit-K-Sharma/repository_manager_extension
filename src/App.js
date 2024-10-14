@@ -236,7 +236,7 @@ function App() {
   const openDeleteRepoDialog = (category, repo) => {
 
     setCurrentCategory(category);
-    setCurrentRepositoryID({ _id: repo._id});
+    setCurrentRepositoryID({ _id: repo._id });
     setIsDeleteRepoOpen(true);
   };
 
@@ -297,7 +297,7 @@ function App() {
     <div className="App min-h-screen flex items-center justify-center bg-gray-100 p-2">
       <div className="w-full max-w-xl bg-white shadow-lg overflow-hidden flex flex-col h-[600px]">
         <div className="bg-[#24292e] text-white py-3 px-4">
-          <h1 className="text-xl font-bold flex items-center justify-center">
+          <h1 className="text-xl font-bold flex items-center justify-center mt-3">
             <FiGithub className="mr-2 text-2xl" />
             GitHub Repository Manager
           </h1>
@@ -308,7 +308,7 @@ function App() {
               <p className="text-gray-600 mb-4">Welcome! Please log in to manage your repositories.</p>
               <button
                 onClick={() => handleLogin().catch((error) => console.error("Login error:", error.message))}
-                className="w-full max-w-xs bg-[#2ea44f] hover:bg-[#2c974b] text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
+                className="w-full max-w-xs bg-[#24292e] hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out flex items-center justify-center"
               >
                 <FiGithub className="mr-2" />
                 Login with GitHub
@@ -331,7 +331,7 @@ function App() {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="bg-[#d73a49] hover:bg-[#cb2431] text-white font-semibold py-1 px-3 rounded-md flex items-center text-xs"
+                  className="bg-[#d73a49] hover:bg-[#cb2431] text-white font-semibold py-3 px-3 rounded-md flex items-center text-xs"
                 >
                   <FiLogOut className="mr-1" />
                   Logout
@@ -340,7 +340,7 @@ function App() {
 
               <button
                 onClick={() => setShowAddCategory(true)}
-                className="w-full bg-[#2ea44f] hover:bg-[#2c974b] text-white font-semibold py-2 px-4 rounded-md flex items-center justify-center mb-4 text-sm"
+                className="w-full bg-[#24292e] hover:bg-slate-800 text-white font-semibold py-2 px-4 rounded-md flex items-center justify-center mb-4 text-sm"
               >
                 <FiPlus className="mr-2" />
                 Add Category
@@ -392,85 +392,89 @@ function App() {
 
               <div className="categories-container">
                 <h2 className="text-lg font-bold mb-2 text-gray-800">Categories</h2>
-                {categories && categories.map((category) => (
-                  <div key={category._id} className="category-item mb-2">
-                    <button
-                      onClick={() => toggleCategory(category._id)}
-                      className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md flex items-center justify-between text-sm"
-                    >
-                      <span>{category.name}</span>
-                      <div className="flex items-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent category toggle
-                            openRepoSelectionDialog(category);
-                          }}
-                          className="mr-2 bg-white text-gray-700 hover:bg-gray-800 hover:text-white p-2 rounded-md shadow"
-                        >
-                          <FiPlus />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openUpdateCategoryDialog(category);
-                          }}
-                          className="mr-2 bg-white text-gray-700 hover:bg-gray-800 hover:text-white p-2 rounded-md shadow"
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openDeleteCategoryDialog(category);
-                          }}
-                          className="mr-2 bg-white text-gray-700 hover:bg-gray-800 hover:text-white p-2 rounded-md shadow"
-                        >
-                          <FiTrash2 />
-                        </button>
-                        {expandedCategories[category._id] ? <FiChevronUp /> : <FiChevronDown />}
+                {(categories && categories.length > 0) ? (
+                  categories.map((category) => (
+                    <div key={category._id} className="category-item mb-2">
+                      <div
+                        onClick={() => toggleCategory(category._id)}
+                        className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md flex items-center justify-between text-sm cursor-pointer">
+                        <span>{category.name}</span>
+                        <div className="flex items-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation(); // Prevent category toggle
+                              openRepoSelectionDialog(category);
+                            }}
+                            className="mr-2 bg-white text-gray-700 hover:bg-gray-800 hover:text-white p-2 rounded-md shadow"
+                          >
+                            <FiPlus />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openUpdateCategoryDialog(category);
+                            }}
+                            className="mr-2 bg-white text-gray-700 hover:bg-gray-800 hover:text-white p-2 rounded-md shadow"
+                          >
+                            <FiEdit2 />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDeleteCategoryDialog(category);
+                            }}
+                            className="mr-2 bg-white text-gray-700 hover:bg-gray-800 hover:text-white p-2 rounded-md shadow"
+                          >
+                            <FiTrash2 />
+                          </button>
+                          {expandedCategories[category._id] ? <FiChevronUp /> : <FiChevronDown />}
+                        </div>
                       </div>
-                    </button>
-                    {expandedCategories[category._id] && (
-                      <div className="category-repos bg-gray-50 rounded-lg p-3 mt-2 max-h-[200px] overflow-y-auto shadow-inner">
-                        {category.repos.length > 0 ? (
-                          <ul className="space-y-2">
-                            {category.repos.map((repo) => (
-                              <li
-                                key={repo.repoName}
-                                className="repo-item bg-white p-3 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200 flex items-center justify-between"
-                              >
-                                <a
-                                  href={repo.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="repo-link flex items-center text-[#0366d6] hover:underline"
-                                >
-                                  <span className="text-sm font-medium">{repo.repoName}</span>
-                                  <FiExternalLink className="ml-2 text-gray-500 hover:text-gray-700 transition duration-150" />
-                                </a>
 
-                                {/* Remove button */}
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openDeleteRepoDialog(category, repo);
-                                  }}
-                                  className="ml-4 bg-red-500 text-white hover:bg-red-600 p-2 rounded-lg shadow"
+                      {expandedCategories[category._id] && (
+                        <div className="category-repos bg-gray-50 rounded-lg p-3 mt-2 max-h-[200px] overflow-y-auto shadow-inner">
+                          {category.repos.length > 0 ? (
+                            <ul className="space-y-2">
+                              {category.repos.map((repo) => (
+                                <li
+                                  key={repo.repoName}
+                                  className="repo-item bg-white p-3 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200 flex items-center justify-between"
                                 >
-                                  <FiTrash2 />
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-gray-500 text-center py-2">No repositories in this category.</p>
-                        )}
-                      </div>
-                    )}
+                                  <a
+                                    href={repo.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="repo-link flex items-center text-[#0366d6] hover:underline"
+                                  >
+                                    <span className="text-sm font-medium">{repo.repoName}</span>
+                                    <FiExternalLink className="ml-2 text-gray-500 hover:text-gray-700 transition duration-150" />
+                                  </a>
 
-                  </div>
-                ))}
+                                  {/* Remove button */}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openDeleteRepoDialog(category, repo);
+                                    }}
+                                    className="ml-4 bg-red-500 text-white hover:bg-red-600 p-2 rounded-lg shadow"
+                                  >
+                                    <FiTrash2 />
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-gray-500 text-center py-2">No repositories in this category.</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-2">No Category added. Please add from the "Add Category".</p>
+                )}
               </div>
+
 
               {showAddCategory && (
                 <div className="modal fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
@@ -492,7 +496,7 @@ function App() {
                       </button>
                       <button
                         onClick={() => addCategory(newCategoryName, userInfo.id)}
-                        className="bg-[#2ea44f] hover:bg-[#2c974b] text-white font-semibold py-1 px-3 rounded-md text-sm"
+                        className="bg-[#24292e] hover:bg-slate-800 text-white font-semibold py-1 px-3 rounded-md text-sm"
                       >
                         Add Category
                       </button>
@@ -520,9 +524,9 @@ function App() {
                         Cancel
                       </button>
                       <button
-                        onClick={() => 
+                        onClick={() =>
                           updateCategory(userInfo.id, updatedCategoryName, currentCategory._id)}
-                        className="bg-[#2ea44f] hover:bg-[#2c974b] text-white font-semibold py-1 px-3 rounded-md text-sm"
+                        className="bg-[#24292e] hover:bg-slate-800 text-white font-semibold py-1 px-3 rounded-md text-sm"
                       >
                         Save Changes
                       </button>
@@ -646,7 +650,7 @@ function App() {
                         Cancel
                       </button>
                       <button
-                        className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg transition ease-in-out duration-200"
+                        className="bg-[#24292e] hover:bg-slate-800 text-white px-4 py-2 rounded-lg transition ease-in-out duration-200"
                         onClick={() =>
                           handleUpdateRepository(userInfo.id, currentCategory._id, "add", selectedRepos)
                         }

@@ -15,7 +15,8 @@
     "host_permissions": [
         "https://github.com/*",
         "https://api.github.com/*",
-        "http://localhost:5000/*"
+        "http://localhost:5000/*",
+        "https://repository-manager-extension-api.onrender.com/*"
     ],
     "action": {
         "default_popup": "index.html",
